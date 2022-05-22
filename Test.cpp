@@ -1,115 +1,117 @@
-//
-// Created by Eitan Kats on 17/05/2022.
-//
-
 #include "doctest.h"
 #include "sources/OrgChart.hpp"
-#include "iostream"
+#include <iostream>
 #include <sstream>
 
+using namespace std;
 using namespace ariel;
 
-TEST_CASE ("Basic Orgchart functionality check") {
-            CHECK_NOTHROW(OrgChart
-                                  chart);
-    OrgChart charti;
-            CHECK_NOTHROW(charti.add_root("Kendrick"));
-            CHECK_NOTHROW(
-            charti.add_sub("Kendrick", "Yeled")
-                    .add_sub("Yeled", "Shalom")
-                    .add_sub("Kendrick", "Lodrick"));
-            CHECK_NOTHROW(charti.add_root("rak python"));
+TEST_CASE("Basic chart check")
+{
+        CHECK_NOTHROW(OrgChart chart1);
+        OrgChart chart2;
+        CHECK_NOTHROW(chart2.add_root("11"));
+        CHECK_NOTHROW(
+            chart2.add_sub("11", "22")
+                .add_sub("22", "33")
+                .add_sub("11", "44"));
+        CHECK_NOTHROW(chart2.add_root("55"));
 
-    OrgChart chartizard;
+        OrgChart chart3;
 
-            SUBCASE("adding sub when node doesn't exist") {
-                CHECK_THROWS(chartizard.add_sub("testy", "testy2"));
-    }
+        SUBCASE("add sub obj when node is not found")
+        {
+                CHECK_THROWS(chart3.add_sub("11", "22"));
+        }
 
-            SUBCASE("creating regular iterator when there is no head") {
-        auto iterStart = chartizard.begin();
-                CHECK(iterStart == chartizard.end());
+        SUBCASE("iterator when there is no head")
+        {
+                auto start = chart3.begin();
+                CHECK(start == chart3.end());
 
-    }
-            SUBCASE("creating reverse order with no head") {
-        auto iterStart = chartizard.begin_reverse_order();
-                CHECK(iterStart == chartizard.end_reverse_order());
-    }
+                auto start2 = chart3.begin_reverse_order();
+                CHECK(start2 == chart3.end_reverse_order());
 
-            SUBCASE("creating pre order with no head") {
-        auto iterStart = chartizard.begin_preorder();
-                CHECK(iterStart == chartizard.end_preorder());
-    }
+                auto start3 = chart3.begin_preorder();
+                CHECK(start3 == chart3.end_preorder());
+        }
 }
 
-TEST_CASE ("Basic Iterator tests") {
-    OrgChart chart;
-            CHECK_NOTHROW(chart.add_root("test"));
+TEST_CASE("Basic Iterator check")
+{
+        OrgChart chart;
+        CHECK_NOTHROW(chart.add_root("11"));
 
-            SUBCASE("basic iterator creation") {
+        SUBCASE("iterator creation")
+        {
 
-        auto iterStart = chart.begin();
-                CHECK_NOTHROW(*iterStart);
-                CHECK_NOTHROW(iterStart++);
-                CHECK(iterStart == chart.end());
-    }
+                auto start = chart.begin();
+                auto end = chart.end();
+                CHECK_NOTHROW(*start);
+                CHECK_NOTHROW(start++);
+                CHECK(start == end);
 
-            SUBCASE("level_order Iterator creation") {
-        auto iterStart = chart.begin_level_order();
-                CHECK_NOTHROW(*iterStart);
-                CHECK_NOTHROW(++iterStart);
-                CHECK(iterStart == chart.end_level_order());
-    }
-            SUBCASE("Preorder Iterator creation") {
-        auto iterStart = chart.begin_preorder();
-                CHECK_NOTHROW(*iterStart);
-                CHECK_NOTHROW(++iterStart);
-                CHECK(iterStart == chart.end_preorder());
-    }
+                auto start2 = chart.begin_level_order();
+                auto end2 = chart.end_level_order();
+                CHECK_NOTHROW(*start2);
+                CHECK_NOTHROW(++start2);
+                CHECK(start2 == end2);
 
-            SUBCASE("reverse order Iterator creation") {
-        auto iterStart = chart.begin_reverse_order();
-                CHECK_NOTHROW(*iterStart);
-                CHECK_NOTHROW(++iterStart);
-                CHECK(iterStart == chart.end_reverse_order());
-    }
+                auto start3 = chart.begin_preorder();
+                auto end3 = chart.end_preorder();
+                CHECK_NOTHROW(*start3);
+                CHECK_NOTHROW(++start3);
+                CHECK(start3 == end3);
 
+                auto start4 = chart.begin_reverse_order();
+                auto end4 = chart.end_reverse_order();
+                CHECK_NOTHROW(*start4);
+                CHECK_NOTHROW(++start4);
+                CHECK(start4 == end4);
+        }
 }
 
-TEST_CASE ("complex iterator tests") {
-    OrgChart chartush;
-    chartush.add_root("1");
-    chartush.add_sub("1", "2")
-            .add_sub("1", "6")
-            .add_sub("1", "7")
-            .add_sub("2", "3")
-            .add_sub("2", "5")
-            .add_sub("3", "4");
-            SUBCASE("pre order") {
-        std::string ans = "1234567";
-        std::stringstream buffer;
-        for (auto element = chartush.begin_preorder(); element != chartush.end_preorder(); ++element) {
-            buffer << (*element);
-        }
-                CHECK(buffer.str() == ans);
-    }
+TEST_CASE("not basix iterator check")
+{
+        OrgChart chart;
+        chart.add_root("11");
+        chart.add_sub("11", "22")
+            .add_sub("11", "66")
+            .add_sub("11", "77")
+            .add_sub("22", "33")
+            .add_sub("22", "55")
+            .add_sub("33", "44");
 
-            SUBCASE("level order") {
-        std::string ans = "1267354";
-        std::stringstream buffer;
-        for (auto element = chartush.begin_level_order(); element != chartush.end_level_order(); ++element) {
-            buffer << (*element);
+        SUBCASE("Level")
+        {
+                string result = "11 22 66 77 33 55 44 ";
+                stringstream streamBuf;
+                for (auto obj = chart.begin_level_order(); obj != chart.end_level_order(); ++obj)
+                {
+                        streamBuf << (*obj);
+                }
+                CHECK(streamBuf.str() == result);
         }
-                CHECK(buffer.str() == ans);
-    }
-
-            SUBCASE("reverse order") {
-        std::string ans = "4352671";
-        std::stringstream buffer;
-        for (auto element = chartush.begin_reverse_order(); element != chartush.end_reverse_order(); ++element) {
-            buffer << (*element);
+        
+        SUBCASE("PreOrder")
+        {
+                string result = "11 22 33 44 55 66 77 ";
+                stringstream streamBuf;
+                for (auto obj = chart.begin_preorder(); obj != chart.end_preorder(); ++obj)
+                {
+                        streamBuf << (*obj);
+                }
+                CHECK(streamBuf.str() == result);
         }
-                CHECK(buffer.str() == ans);
-    }
 
+        SUBCASE("Reverse")
+        {
+                string result = "44 33 55 22 66 77 11 ";
+                stringstream streamBuf;
+                for (auto obj = chart.begin_reverse_order(); obj != chart.end_reverse_order(); ++obj)
+                {
+                        streamBuf << (*obj);
+                }
+                CHECK(streamBuf.str() == result);
+        }
 }

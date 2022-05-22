@@ -1,118 +1,123 @@
-//
-// Created by Eitan Kats on 11/05/2022.
-//
+#include <queue>
+#include <iostream>
+#include <stdexcept>
 
 #include "OrgChart.hpp"
-#include "OrgChartLevelIterator.hpp"
-#include "iostream"
-#include "stdexcept"
-#include "queue"
-#include "OrgChartReverseIterator.hpp"
 
 namespace ariel {
-    OrgChartLevelIterator OrgChart::begin() {
-        return OrgChartLevelIterator(this->_root);
-    }
 
-    OrgChartLevelIterator OrgChart::end() {
-        return OrgChartLevelIterator(nullptr);
-    }
+    // constractor:
+    OrgChart::OrgChart() : _rootNode(nullptr) {}
 
-    OrgChartLevelIterator OrgChart::begin_level_order() {
-        return OrgChartLevelIterator(this->_root);
-    }
+    OrgChart::OrgChart(const OrgChart &chart2) {}
 
-    OrgChartLevelIterator OrgChart::end_level_order() {
-        return OrgChartLevelIterator(nullptr);
-    }
-
-
-    OrgChartPreOrderIterator OrgChart::begin_preorder() {
-        return OrgChartPreOrderIterator(this->_root);
-    }
-
-    OrgChartPreOrderIterator OrgChart::end_preorder() {
-        return OrgChartPreOrderIterator(nullptr);
-    }
-
-    OrgChartReverseIterator OrgChart::begin_reverse_order() {
-        return OrgChartReverseIterator(this->_root);
-    }
-
-    OrgChartReverseIterator OrgChart::reverse_order() {
-        return OrgChartReverseIterator(nullptr);
-    }
-
-    OrgChartReverseIterator OrgChart::end_reverse_order() {
-        return OrgChartReverseIterator(nullptr);
-    }
-
-    OrgChart::OrgChart() : _root(nullptr) {}
-
-    std::ostream &operator<<(std::ostream &output, const OrgChart &chart) {
-        output << "BLA";
-        return output;
-    }
-
-    OrgChart &OrgChart::add_root(const std::string &newRoot) {
-
-        if (_root == nullptr) {
-            Node *rootNode = new Node(newRoot);
-            this->_root = rootNode;
-        } else {
-            std::string prevLabel = this->_root->getLabel();
-            this->_root->setLabel(newRoot);
-            this->labelMap.erase(prevLabel);
-        }
-        this->labelMap.insert({newRoot, this->_root});
-
-        return *this;
-
-    }
-
-    OrgChart &OrgChart::add_sub(const std::string &existingElem, const std::string &newElem) {
-        auto searchResult = this->labelMap.find(existingElem);
-        if (searchResult != this->labelMap.end()) {
-            Node *currNode = searchResult->second;
-            Node *newChild = new Node(newElem);
-            currNode->add_child(newChild);
-            this->labelMap.insert({newElem, newChild});
-
-        } else {
-            throw std::invalid_argument("element doesn't exist");
-        }
-        return *this;
-    }
-
+    // destractor:
     OrgChart::~OrgChart() {
         this->clearChart();
     }
 
-    OrgChart &OrgChart::operator=(OrgChart &otherChart) {
+    // set root:
+    OrgChart &OrgChart::add_root(const string &rootName) {
+
+        if (_rootNode == nullptr) {
+            NodeObject *rootNode = new NodeObject(rootName);
+            this->_rootNode = rootNode;
+        } else {
+            string previousName = this->_rootNode->getName();
+            this->_rootNode->setName(rootName);
+            this->_namesMap.erase(previousName);
+        }
+        this->_namesMap.insert({rootName, this->_rootNode});
+
         return *this;
     }
 
-    OrgChart::OrgChart(const OrgChart &otherChart) {
+    // add elements:
+    OrgChart &OrgChart::add_sub(const string &father, const string &kid) {
+        auto find = this->_namesMap.find(father);
+        if (find != this->_namesMap.end()) {
+            NodeObject *nodeObj = find->second;
+            NodeObject *newKid = new NodeObject(kid);
+            nodeObj->addKid(newKid);
+            this->_namesMap.insert({kid, newKid});
 
+        }
+        else {
+            throw invalid_argument("object is not found!");
+        }
+        return *this;
     }
 
+    // clean chart:
     void OrgChart::clearChart() {
-        if (_root == nullptr) {
+        if (_rootNode == nullptr) {
             return;
         }
-        std::queue<Node *> clearingQueue;
-        for (Node *child: this->_root->getChildren()) {
-            clearingQueue.push(child);
+        queue<NodeObject *> deleteQ;
+        for (NodeObject *kid: this->_rootNode->getKids()) {
+            deleteQ.push(kid);
         }
-        delete this->_root;
-        while (!clearingQueue.empty()) {
-            Node *toClear = clearingQueue.front();
-            clearingQueue.pop();
-            for (Node *child: toClear->getChildren()) {
-                clearingQueue.push(child);
+        delete this->_rootNode;
+        while (!deleteQ.empty()) {
+            NodeObject *toDelete = deleteQ.front();
+            deleteQ.pop();
+            for (NodeObject *kid: toDelete->getKids()) {
+                deleteQ.push(kid);
             }
-            delete toClear;
+            delete toDelete;
         }
+    }
+
+    // Level Iterator:
+
+    LevelIterator OrgChart::begin() {
+        return LevelIterator(this->_rootNode);
+    }
+
+    LevelIterator OrgChart::end() {
+        return LevelIterator(nullptr);
+    }
+
+    LevelIterator OrgChart::begin_level_order() {
+        return LevelIterator(this->_rootNode);
+    }
+
+    LevelIterator OrgChart::end_level_order() {
+        return LevelIterator(nullptr);
+    }
+
+    // Pre Order Iterator:
+    PreOrderIterator OrgChart::begin_preorder() {
+        return PreOrderIterator(this->_rootNode);
+    }
+
+    PreOrderIterator OrgChart::end_preorder() {
+        return PreOrderIterator(nullptr);
+    }
+
+    // Reverse Iterator:
+    ReverseIterator OrgChart::begin_reverse_order() {
+        return ReverseIterator(this->_rootNode);
+    }
+
+    ReverseIterator OrgChart::reverse_order() {
+        return OrgChart::end_reverse_order();
+    }
+
+    ReverseIterator OrgChart::end_reverse_order() {
+        return ReverseIterator(nullptr);
+    }
+
+
+    // operators:
+
+    ostream &operator<<(ostream &outputStream, const OrgChart &chart) {
+        outputStream << "...";
+        return outputStream;
+    }
+
+    OrgChart &OrgChart::operator=(OrgChart &otherChart) {
+        return *this;
     }
 
 }

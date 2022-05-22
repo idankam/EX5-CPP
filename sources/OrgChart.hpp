@@ -1,62 +1,54 @@
-//
-// Created by Eitan Kats on 11/05/2022.
-//
+#ifndef ORGCHART
+#define ORGCHART
 
-#ifndef EX5_CPP_ORGCHART_HPP
-#define EX5_CPP_ORGCHART_HPP
+#include <iostream>
+#include <unordered_map>
 
-#include "Node.hpp"
-#include "iostream"
-#include "unordered_map"
-#include "OrgChartLevelIterator.hpp"
-#include "OrgChartPreOrderIterator.hpp"
-#include "OrgChartReverseIterator.hpp"
+#include "NodeObject.hpp"
+#include "LevelIterator.hpp"
+#include "PreOrderIterator.hpp"
+#include "ReverseIterator.hpp"
 
 namespace ariel {
+
     class OrgChart {
     private:
-        Node *_root;
-        std::unordered_map<std::string, Node *> labelMap;
-
+        
+        NodeObject *_rootNode;
+        unordered_map<string, NodeObject *> _namesMap;
         void clearChart();
 
     public:
 
+        // contractors:
         OrgChart();
-
+        OrgChart(const OrgChart &chart2);
         ~OrgChart();
 
-        OrgChart &operator=(OrgChart &otherChart);
+        // add:
+        OrgChart &add_root(const string &rootNodeObject);
+        OrgChart &add_sub(const string &father, const string &kid);
+        
+        // level iterator:
+        LevelIterator begin();
+        LevelIterator end();
+        LevelIterator begin_level_order();
+        LevelIterator end_level_order();
 
-        OrgChart(const OrgChart &otherChart);
+        // reverse iterator:
+        ReverseIterator begin_reverse_order();
+        ReverseIterator reverse_order();
+        ReverseIterator end_reverse_order();
 
-        OrgChart &add_sub(const std::string &existingElem, const std::string &newElem);
+        // pre order iterator:
+        PreOrderIterator begin_preorder();
+        PreOrderIterator end_preorder();        
 
-
-        OrgChart &add_root(const std::string &newRoot);
-
-        OrgChartLevelIterator begin_level_order();
-
-        OrgChartLevelIterator end_level_order();
-
-        OrgChartReverseIterator begin_reverse_order();
-        OrgChartReverseIterator reverse_order();
-        OrgChartReverseIterator end_reverse_order();
-
-        OrgChartPreOrderIterator begin_preorder();
-
-        OrgChartPreOrderIterator end_preorder();
-
-        OrgChartLevelIterator begin();
-
-        OrgChartLevelIterator end();
-
-
-
-        friend std::ostream &operator<<(std::ostream &output, const OrgChart &chart);
+        // operators:
+        OrgChart &operator=(OrgChart &chart2);
+        friend ostream &operator<<(ostream &output, const OrgChart &chart);
 
     };
 }
 
-
-#endif //EX5_CPP_ORGCHART_HPP
+#endif
